@@ -17,7 +17,6 @@ function firstAdmin(req, res) {
             })
               .then((account) => {
                 console.log(`Le compte ${account.username} a été créé!`);
-                //console.log({ message: `Le compte ${admin.username} a été créé!`});
               })
               .catch((error) => { 
                 console.log(error);
