@@ -1,12 +1,19 @@
 const express = require('express'); 
 const app = express();
-const db = require("./models/index");
 const path = require("path");
+//const db = require("./models/index");
 
-db.sequelize.sync()
-  .then(function () {
+// Sync Tables 
+/*
+db.sequelize.sync({ alter: true })
+*/
+
+// Create Admin account
+/*
+.then(function () {
   require("./conf/firstadmin");
 });
+*/
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,6 +25,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/pics", express.static(path.join(__dirname, "pics")));
 app.use("/defaultpics", express.static(path.join(__dirname, "defaultpics")));
 app.use('/api/users', require('./routes/user'));
 
