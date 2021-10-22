@@ -68,16 +68,16 @@ exports.modifyAccount = async (req, res, next) => {
     let newAvatar;
     if (req.params.id === userId){
       if (req.file && user.avatar) {
-        newAvatar = `${req.protocol}://${req.get("host")}/pics/${
+        newAvatar = `${req.protocol}://${req.get("host")}/avatars/${
           req.file.filename
         }`;
-      const filename = user.avatar.split("/pics")[1];
-        fs.unlink(`pics/${filename}`, (err) => {
+      const filename = user.avatar.split("/avatars")[1];
+        fs.unlink(`avatars/${filename}`, (err) => {
           if (err) console.log(err);
-          else { console.log(`Image Supprimée: pics/${filename}`); }
+          else { console.log(`Image Supprimée: avatars/${filename}`); }
         });
     } else if (req.file) {
-      newAvatar = `${req.protocol}://${req.get("host")}/pics/${
+      newAvatar = `${req.protocol}://${req.get("host")}/avatars/${
         req.file.filename
       }`;
     }
@@ -95,6 +95,50 @@ exports.modifyAccount = async (req, res, next) => {
     } else {
       return res.status(403).json({ error: "Vous n'êtes pas autorisé à modifier ce profil" });
     }
+  } catch (error) {
+    return res.status(500).json({ error: "Erreur Serveur" });
+  }
+};
+
+exports.deleteAccount = async (req, res) => {
+  try {
+      const userId = auth.getUserID(req);
+      const isAdmin = await db.User.findOne({ where: { id: userId } }); 
+      const user = await db.User.findOne({ where: { id: req.params.id } });
+      if (req.params.id === userId || isAdmin.role === "admin"){
+      if (user.avatar !== null) {
+        const filename = user.avatar.split("/avatars")[1];
+        fs.unlink(`avatars/${filename}`, () => {
+          db.User.destroy({ where: { id: req.params.id } });
+          res.status(200).json({ message: "Le compte a été supprimé" });
+        });
+        } else {
+          db.User.destroy({ where: { id: req.params.id } });
+          res.status(200).json({ message: "Le compte a été supprimé" });
+        }
+    } else {
+      return res.status(403).json({ error: "Vous n'êtes pas autorisé à supprimer ce compte" });
+    } 
+  } catch (error) {
+    return res.status(500).json({ error: "Erreur serveur" });
+  }
+};
+
+exports.getOneUser = async (req, res, next) => {
+  try {
+    const user = await db.User.findOne({ attributes: ["id", "username", "email", "avatar"],
+    where: { id: req.params.id } });
+    res.status(200).json({userInfos : user});
+  } catch (error) {
+    return res.status(500).json({ error: "Erreur Serveur" });
+  }
+};
+
+exports.getAllUsers = async (req, res, next) => {
+  try {
+    const users = await db.User.findAll({ attributes: ["id", "username", "email", "avatar"],
+    where: { role: { [Op.ne]: "admin", } }, });
+    res.status(200).json(users);
   } catch (error) {
     return res.status(500).json({ error: "Erreur Serveur" });
   }

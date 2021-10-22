@@ -2,10 +2,10 @@ const multer = require('multer');
 
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
-        callback(null, './pics');
+        callback(null, './avatars');
     },
     filename: (req, file, callback) => {
-        callback(null, "breizhpic" + '_' + Date.now());
+        callback(null, "" + Date.now());
     }
 });
 
@@ -23,7 +23,7 @@ let fileFilter = function (req, file, cb) {
 let obj = {
     storage: storage,
     limits: {
-        fileSize: 200000
+        fileSize: 1000000
     },
     fileFilter: fileFilter
 };
@@ -34,7 +34,7 @@ exports.fileUpload = (req, res, next) => {
         if (error) {
             res.status(500);
             if (error.code == 'LIMIT_FILE_SIZE') {
-                error.message = 'Cette image dépasse la taille limite de 200Mo';
+                error.message = 'Cet avatar dépasse la taille limite de 1Mo';
                 error.success = false;
             }
             return res.json(error);

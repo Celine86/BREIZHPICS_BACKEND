@@ -26,6 +26,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/pics", express.static(path.join(__dirname, "pics")));
+app.use("/avatars", express.static(path.join(__dirname, "avatars")));
 app.use("/defaultpics", express.static(path.join(__dirname, "defaultpics")));
 app.use('/api/users', require('./routes/user'));
 
