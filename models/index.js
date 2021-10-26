@@ -16,6 +16,22 @@ let sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, proc
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   dialect: process.env.DB_DIALECT,
+  define: {
+    underscored: true,
+    freezeTableName: true, 
+    timestamps: true,  
+  },
+  dialectOptions: {
+    useUTC: false, 
+    dateStrings: true,
+    typeCast: function (field, next) {
+      if (field.type === 'DATETIME') {
+        return field.string()
+      }
+        return next()
+    },
+  },
+  timezone: process.env.TIMEZONE
 });
 
 /*

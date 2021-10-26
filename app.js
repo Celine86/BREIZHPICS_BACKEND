@@ -4,14 +4,18 @@ const path = require("path");
 //const db = require("./models/index");
 
 // Sync Tables 
-/*
-db.sequelize.sync({ alter: true })
-*/
+//db.sequelize.sync()
 
-// Create Admin account
+// Sync Tables and force modifications 
+// db.sequelize.sync({ alter: true, force: false })
+// Note, set force to true if error "Too many keys specified; max 64 keys allowed"
+
+// Create Admin and Modo account
 /*
 .then(function () {
-  require("./conf/firstadmin");
+  require("./conf/firstadminandmodo");
+  firstAdmin();
+  firstModo();
 });
 */
 
@@ -29,5 +33,6 @@ app.use("/pics", express.static(path.join(__dirname, "pics")));
 app.use("/avatars", express.static(path.join(__dirname, "avatars")));
 app.use("/defaultpics", express.static(path.join(__dirname, "defaultpics")));
 app.use('/api/users', require('./routes/user'));
+app.use('/api/pics', require('./routes/pic'));
 
 module.exports = app;

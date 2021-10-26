@@ -136,8 +136,8 @@ exports.getOneUser = async (req, res, next) => {
 
 exports.getAllUsers = async (req, res, next) => {
   try {
-    const users = await db.User.findAll({ attributes: ["id", "username", "email", "avatar"],
-    where: { role: { [Op.ne]: "admin", } }, });
+    const users = await db.User.findAll({ attributes: ["id", "username", "email", "avatar", "createdAt"],
+    where: { role: { [Op.not]: ["admin", "modo" ]} }, });
     res.status(200).json(users);
   } catch (error) {
     return res.status(500).json({ error: "Erreur Serveur" });

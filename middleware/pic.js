@@ -1,16 +1,25 @@
 const multer = require('multer');
+const auth = require("../middleware/auth");
+
+const MIME_TYPES = {
+    'image/jpg': 'jpg',
+    'image/jpeg': 'jpg',
+    'image/png': 'png'
+};
 
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
         callback(null, './pics');
     },
-    filename: (req, file, callback) => {
-        callback(null, "breizhpic" + '_' + Date.now());
+    filename: async (req, file, callback) => {
+        const author = await auth.getUserUsername(req);
+        const extension = MIME_TYPES[file.mimetype];
+        callback(null, author + '_' + 'breizhpic' + '_' + Date.now() + '.' + extension);
     }
 });
 
 let fileFilter = function (req, file, cb) {
-    var allowedMimes = ['image/jpeg', 'image/jpg', 'image/png'];
+    let allowedMimes = ['image/jpeg', 'image/jpg', 'image/png'];
     if (allowedMimes.includes(file.mimetype)) {
         cb(null, true);
     } else {
@@ -41,7 +50,7 @@ exports.fileUpload = (req, res, next) => {
         } else {
             if (!req.file) {
                 res.status(500);
-                res.json('Aucune fichier trouvé');
+                res.json('Aucun fichier trouvé');
             }
             next();
         }

@@ -3,7 +3,6 @@ const router = express.Router();
 const ctrl = require("../controllers/user");
 const check = require("../middleware/check");
 const avatar = require("../middleware/avatar");
-const pic = require("../middleware/pic");
 const auth = require("../middleware/auth");
 
 router.post("/signup", check.mail, check.password, ctrl.signup);
