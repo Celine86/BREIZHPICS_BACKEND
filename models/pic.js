@@ -24,7 +24,9 @@ module.exports = (sequelize, DataTypes) => {
     location: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: false },
     beforeSubmission: { type: DataTypes.BOOLEAN, allowNull:false, defaultValue: true },
+    validatedBy: { type: DataTypes.STRING, allowNUll: true },
     errorReported: { type: DataTypes.BOOLEAN, allowNull:false, defaultValue: false },
+    errorReportedBy: { type: DataTypes.STRING, allowNUll: true },
     modifiedBy: { type: DataTypes.STRING, allowNull: true },
   }, {
     sequelize,
