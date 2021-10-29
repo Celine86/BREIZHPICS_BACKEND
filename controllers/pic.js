@@ -69,39 +69,34 @@ exports.modifyPic = async (req, res, next) => {
                 fields: ["location", "description", "picUrl", "modifiedBy"],
             });
             res.status(200).json({ newPost: newPic, message: "Le Post a été modifié" });
-          } 
-          else {
-            res.status(400).json({ message: "Vous n'êtes pas autorisé à modifier ce post" });
-          }
+        } 
+        else {
+        res.status(400).json({ message: "Vous n'êtes pas autorisé à modifier ce post" });
+        }
     } catch (error) {
         return res.status(500).json({ error: "Erreur Serveur" });
     }
 };
+
 
 exports.deletePic = async (req, res, next) => {
     try {
-        const userId = auth.getUserID(req);
-        const isAdmin = await db.User.findOne({ where: { id: userId } });
-        const thisPic = await db.Pic.findOne({ where: { id: req.params.id } });
+        const userId = auth.getUserID(req)
+        const isAdmin = await db.User.findOne({ where: { id: userId } })
+        const thisPic = await db.Pic.findOne({ where: { id: req.params.id } })
         if (userId === thisPic.UserId || isAdmin.role === "admin") {
-            if (thisPic.picUrl) {
-              const filename = thisPic.picUrl.split("/pics")[1];
-              fs.unlink(`pics/${filename}`, () => {
+            const filename = thisPic.picUrl.split("/pics")[1];
+            fs.unlink(`pics/${filename}`, () => {
                 db.Pic.destroy({ where: { id: thisPic.id } });
                 res.status(200).json({ message: "Le Post a été supprimé" });
-              });
-            } else {
-              db.Pic.destroy({ where: { id: thisPic.id } }, { truncate: true });
-              res.status(200).json({ message: "Le Post a été supprimé" });
-            }
-          } else {
-            res.status(400).json({ message: "Vous n'êtes pas autotisé à supprimer ce Post" });
-          }
+            }) 
+        } else {
+        res.status(400).json({ message: "Vous n'êtes pas autorisé à supprimer ce Post" });
+        }
     } catch (error) {
         return res.status(500).json({ error: "Erreur Serveur" });
     }
 };
-
 
 exports.getAllPicsByLocation = async (req, res, next) => {
     try {
@@ -112,7 +107,7 @@ exports.getAllPicsByLocation = async (req, res, next) => {
                 where: { location: req.body.location, before_submission: 0 }, 
                 limit: 10,
                 order: [["created_at", "DESC"]],
-                attributes: ["id", "location", "description", "picUrl"]
+                attributes: ["id", "location", "description", "picUrl", "createdAt", "updatedAt"]
             });
             if(pics.length !== 0) {
                 res.status(200).json(pics);
@@ -123,7 +118,7 @@ exports.getAllPicsByLocation = async (req, res, next) => {
     } catch (error) {
         return res.status(500).json({ error: "Erreur Serveur" });        
     }
-}
+};
 
 exports.getAllPicsByDescription = async (req, res, next) => {
     try {
@@ -131,7 +126,7 @@ exports.getAllPicsByDescription = async (req, res, next) => {
             res.status(200).json({ message: "Merci de renseigner un lieu" });
         } else {
             const pics = await db.Pic.findAll({ 
-                where: { description: { [Op.like]: `%${req.body.description}%` }, before_submission: 0 }, 
+                where: { description: { [Op.like]: `%${req.body.description}%` }, before_submission: 0, error_reported: 0 }, 
                 limit: 10,
                 order: [["created_at", "DESC"]],
                 attributes: ["id", "location", "description", "picUrl"]
@@ -145,4 +140,62 @@ exports.getAllPicsByDescription = async (req, res, next) => {
     } catch (error) {
         return res.status(500).json({ error: "Erreur Serveur" });        
     }
-}
+};
+
+exports.validatePic = async (req, res, next) => {
+    try {
+        const userId = auth.getUserID(req);
+        const isModo = await db.User.findOne({ where: { id: userId } });
+        const isAdmin = await db.User.findOne({ where: { id: userId } });
+        const hasValidate = await db.User.findOne({ where: { id: userId } });
+        const thisPic = await db.Pic.findOne({ where: { id: req.params.id } });
+        if (isModo.role === "modo" || isAdmin.role === "admin") {
+            if (req.body.beforeSubmission) {
+                thisPic.beforeSubmission = req.body.beforeSubmission;
+            }
+            thisPic.validatedBy = hasValidate.username;
+            const newPic = await thisPic.save({
+                fields: ["beforeSubmission", "validatedBy"],
+            });
+            res.status(200).json({ newPost: newPic, message: "Le Post a été validé" });
+        } 
+        else {
+            res.status(400).json({ message: "Vous n'êtes pas autorisé à valider ce post" });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: "Erreur Serveur" });
+    }
+};
+
+exports.getAllPicsToValidate = async (req, res, next) => {
+    try {
+        const userId = auth.getUserID(req);
+        const isModo = await db.User.findOne({ where: { id: userId } });
+        const isAdmin = await db.User.findOne({ where: { id: userId } });
+        const picsToValidate = await db.Pic.findAll({ where: { beforeSubmission: true } });
+        if (isModo.role === "modo" || isAdmin.role === "admin") {
+            res.status(200).json({ pics: picsToValidate });
+        } else {
+            res.status(400).json({ message: "Vous n'êtes pas autorisé à afficher cette page" });
+        }
+    } catch {
+        return res.status(500).json({ error: "Erreur Serveur" });
+    }
+};
+
+exports.getAllReportedPics = async (req, res, next) => {
+    try {
+        const userId = auth.getUserID(req);
+        const isModo = await db.User.findOne({ where: { id: userId } });
+        const isAdmin = await db.User.findOne({ where: { id: userId } });
+        const reportedPics = await db.Pic.findAll({ where: { errorReported: true } });
+        if (isModo.role === "modo" || isAdmin.role === "admin") {
+            res.status(200).json({ pics: reportedPics });
+        } else {
+            res.status(400).json({ message: "Vous n'êtes pas autorisé à afficher cette page" });
+        }
+    } catch {
+        return res.status(500).json({ error: "Erreur Serveur" });
+    }
+};
+

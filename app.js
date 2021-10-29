@@ -1,23 +1,24 @@
+// Create and Sync Tables 
+/*
+const db = require("./models/index");
+db.sequelize.sync()
+*/
+// Create Admin, Modo and User account
+/*
+.then(function () {
+  require("./seeders/firstaccounts");
+  firstAdmin();
+  firstModo();
+  firstUser();
+});
+*/
+// Sync Tables and force modifications 
+// Note, set force to true if error "Too many keys specified; max 64 keys allowed"
+// db.sequelize.sync({ alter: true, force: false })
+
 const express = require('express'); 
 const app = express();
 const path = require("path");
-const db = require("./models/index");
-
-// Sync Tables 
-db.sequelize.sync()
-
-// Sync Tables and force modifications 
-// db.sequelize.sync({ alter: true, force: false })
-// Note, set force to true if error "Too many keys specified; max 64 keys allowed"
-
-// Create Admin and Modo account
-
-.then(function () {
-  require("./conf/firstadminandmodo");
-  firstAdmin();
-  firstModo();
-});
-
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

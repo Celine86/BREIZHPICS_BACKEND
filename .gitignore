@@ -3,3 +3,4 @@ config
 .env
 pics
 avatars
+migrations
