@@ -2,5 +2,6 @@ node_modules
 config
 .env
 pics
+picshistory
 avatars
 migrations
