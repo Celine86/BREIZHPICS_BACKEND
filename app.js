@@ -2,9 +2,9 @@
 /*
 const db = require("./models/index");
 db.sequelize.sync()
-*/
+
 // Create Admin, Modo and User account
-/*
+
 .then(function () {
   require("./seeders/firstaccounts");
   firstAdmin();
@@ -31,6 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/pics", express.static(path.join(__dirname, "pics")));
+app.use("/picshistory", express.static(path.join(__dirname, "picshistory")));
 app.use("/avatars", express.static(path.join(__dirname, "avatars")));
 app.use("/defaultpics", express.static(path.join(__dirname, "defaultpics")));
 app.use('/api/users', require('./routes/user'));

@@ -87,7 +87,7 @@ function firstUser(req, res) {
               email: "toto@breizhpics.bzh",
               avatar: `${process.env.SERVERADDRESS}defaultpics/avatar.png`,
               password: hash,
-              role: "!Totopassw0rd",
+              role: "user",
             })
               .then((account) => {
                 console.log(`Le compte ${account.username} a été créé!`);

@@ -11,6 +11,7 @@ exports.createPic = async (req, res, next) => {
         const user = await db.User.findOne({ where: { id: userId } });
         if(user !== null) { 
             if (req.file) {
+                picName = req.file.filename
                 picUrl = `${req.protocol}://${req.get('host')}/pics/${req.file.filename}`;
             } else {
                 return res.status(403).json({ message: "Merci de rajouter une photographie" });
@@ -24,6 +25,7 @@ exports.createPic = async (req, res, next) => {
                 const myPic = await db.Pic.create({
                     location: xss(req.body.location),
                     description: xss(req.body.description),
+                    picName: picName,
                     picUrl: picUrl,
                     UserId: user.id
                 }); 
@@ -89,7 +91,7 @@ exports.deletePic = async (req, res, next) => {
             fs.unlink(`pics/${filename}`, () => {
                 db.Pic.destroy({ where: { id: thisPic.id } });
                 res.status(200).json({ message: "Le Post a été supprimé" });
-            }) 
+            })
         } else {
         res.status(400).json({ message: "Vous n'êtes pas autorisé à supprimer ce Post" });
         }

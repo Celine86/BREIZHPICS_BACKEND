@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
   Pic.init({
     id: { type: DataTypes.UUID, allowNull: false, defaultValue: Sequelize.UUIDV4, primaryKey: true },
     picUrl: { type: DataTypes.STRING, allowNull: false },
+    picName: { type: DataTypes.STRING, allowNull: false },
     location: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: false },
     beforeSubmission: { type: DataTypes.BOOLEAN, allowNull:false, defaultValue: true },
