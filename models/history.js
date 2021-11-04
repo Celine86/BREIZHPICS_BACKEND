@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     picDeletedBy: { type: DataTypes.STRING, allowNull: true },
     userUsername: { type: DataTypes.STRING, allowNull: true },
     userEmail: { type: DataTypes.STRING, allowNull: true },
+    historyReason: { type: DataTypes.STRING, allowNull: true }
   }, {
     sequelize,
     modelName: 'History',

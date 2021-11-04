@@ -36,5 +36,6 @@ app.use("/avatars", express.static(path.join(__dirname, "avatars")));
 app.use("/defaultpics", express.static(path.join(__dirname, "defaultpics")));
 app.use('/api/users', require('./routes/user'));
 app.use('/api/pics', require('./routes/pic'));
+app.use('/api/history', require('./routes/history'));
 
 module.exports = app;

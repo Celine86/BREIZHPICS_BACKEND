@@ -29,7 +29,7 @@ exports.createPic = async (req, res, next) => {
                     picUrl: picUrl,
                     UserId: user.id
                 }); 
-                res.status(200).json({ post: myPic, message: "Post ajouté" });
+                res.status(200).json({ post: myPic, message: "Le post a été ajouté et est en attente de validation" });
             }
         }
         else {
@@ -67,10 +67,19 @@ exports.modifyPic = async (req, res, next) => {
             }
             thisPic.modifiedBy = hasModified.username;
             thisPic.picUrl = newPicUrl;
+            if (userId === thisPic.UserId) {
+                thisPic.beforeSubmission = true;
+            } else {
+                thisPic.beforeSubmission = false;
+            }
             const newPic = await thisPic.save({
-                fields: ["location", "description", "picUrl", "modifiedBy"],
+                fields: ["location", "description", "picUrl", "modifiedBy", "beforeSubmission"],
             });
-            res.status(200).json({ newPost: newPic, message: "Le Post a été modifié" });
+            if (userId === thisPic.UserId) {
+                res.status(200).json({ newPost: newPic, message: "Le post a été modifié et est en attente de validation" });
+            } else {
+                res.status(200).json({ newPost: newPic, message: "Le post a été modifié" });
+            }  
         } 
         else {
         res.status(400).json({ message: "Vous n'êtes pas autorisé à modifier ce post" });

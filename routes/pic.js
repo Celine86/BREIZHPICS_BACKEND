@@ -15,4 +15,5 @@ router.put("/validate/:id", auth.signin, ctrlpic.validatePic);
 router.get("/picstovalidate/", auth.signin, ctrlpic.getAllPicsToValidate);
 router.get("/reportedpics/", auth.signin, ctrlpic.getAllReportedPics);
 
+
 module.exports = router;
