@@ -89,7 +89,6 @@ exports.modifyPic = async (req, res, next) => {
     }
 };
 
-
 exports.deletePic = async (req, res, next) => {
     try {
         const userId = auth.getUserID(req)
@@ -153,31 +152,6 @@ exports.getAllPicsByDescription = async (req, res, next) => {
     }
 };
 
-exports.validatePic = async (req, res, next) => {
-    try {
-        const userId = auth.getUserID(req);
-        const isModo = await db.User.findOne({ where: { id: userId } });
-        const isAdmin = await db.User.findOne({ where: { id: userId } });
-        const hasValidate = await db.User.findOne({ where: { id: userId } });
-        const thisPic = await db.Pic.findOne({ where: { id: req.params.id } });
-        if (isModo.role === "modo" || isAdmin.role === "admin") {
-            if (req.body.beforeSubmission) {
-                thisPic.beforeSubmission = req.body.beforeSubmission;
-            }
-            thisPic.validatedBy = hasValidate.username;
-            const newPic = await thisPic.save({
-                fields: ["beforeSubmission", "validatedBy"],
-            });
-            res.status(200).json({ newPost: newPic, message: "Le Post a été validé" });
-        } 
-        else {
-            res.status(400).json({ message: "Vous n'êtes pas autorisé à valider ce post" });
-        }
-    } catch (error) {
-        return res.status(500).json({ error: "Erreur Serveur" });
-    }
-};
-
 exports.getAllPicsToValidate = async (req, res, next) => {
     try {
         const userId = auth.getUserID(req);
@@ -188,6 +162,49 @@ exports.getAllPicsToValidate = async (req, res, next) => {
             res.status(200).json({ pics: picsToValidate });
         } else {
             res.status(400).json({ message: "Vous n'êtes pas autorisé à afficher cette page" });
+        }
+    } catch {
+        return res.status(500).json({ error: "Erreur Serveur" });
+    }
+};
+
+exports.validatePic = async (req, res, next) => {
+    try {
+        const userId = auth.getUserID(req);
+        const isModo = await db.User.findOne({ where: { id: userId } });
+        const isAdmin = await db.User.findOne({ where: { id: userId } });
+        const hasValidate = await db.User.findOne({ where: { id: userId } });
+        const thisPic = await db.Pic.findOne({ where: { id: req.params.id } });
+        if ((isModo.role === "modo" || isAdmin.role === "admin") && thisPic.beforeSubmission === true) {
+            if (req.body.beforeSubmission === false) {
+                thisPic.beforeSubmission === false;
+                thisPic.validatedBy = hasValidate.username;
+                const newPic = await thisPic.save({ fields: ["beforeSubmission", "validatedBy"] });
+                res.status(200).json({ newPost: newPic, message: "Le Post a été validé" });
+            }
+            if (req.body.errorReported === false) {
+                thisPic.beforeSubmission === false;
+                thisPic.validatedBy = hasValidate.username;
+                const newPic = await thisPic.save({ fields: ["beforeSubmission", "validatedBy"] });
+                res.status(200).json({ newPost: newPic, message: "Le Post a été validé" });
+            }
+        } 
+        else {
+            res.status(400).json({ message: "Vous n'êtes pas autorisé à valider ce post" });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: "Erreur Serveur" });
+    }
+};
+
+exports.reportPic = async (req, res, next) => {
+    try {
+        const thisPic = await db.Pic.findOne({ where: { id: req.params.id } });
+        if (req.body.errorReported) {
+            thisPic.errorReported = true;
+            thisPic.reportReason = xss(req.body.reportreason);
+            await thisPic.save({ fields: ["errorReported", "reportReason"] });
+            next();
         }
     } catch {
         return res.status(500).json({ error: "Erreur Serveur" });

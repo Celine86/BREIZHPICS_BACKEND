@@ -1,5 +1,5 @@
 // Create and Sync Tables 
-/*
+
 const db = require("./models/index");
 db.sequelize.sync()
 
@@ -11,7 +11,7 @@ db.sequelize.sync()
   firstModo();
   firstUser();
 });
-*/
+
 // Sync Tables and force modifications 
 // Note, set force to true if error "Too many keys specified; max 64 keys allowed"
 // db.sequelize.sync({ alter: true, force: false })

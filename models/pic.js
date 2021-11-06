@@ -24,9 +24,11 @@ module.exports = (sequelize, DataTypes) => {
     picName: { type: DataTypes.STRING, allowNull: false },
     location: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: false },
-    beforeSubmission: { type: DataTypes.BOOLEAN, allowNull:false, defaultValue: true },
+    beforeSubmission: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
     validatedBy: { type: DataTypes.STRING, allowNUll: true },
-    errorReported: { type: DataTypes.BOOLEAN, allowNull:false, defaultValue: false },
+    errorReported: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    reportReason: { type: DataTypes.TEXT, allowNull: true },
+    unreportedBy: { type: DataTypes.STRING, allowNUll: true },
     modifiedBy: { type: DataTypes.STRING, allowNull: true },
   }, {
     sequelize,

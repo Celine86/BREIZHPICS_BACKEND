@@ -41,33 +41,32 @@ exports.deleteHPic = async (req, res, next) => {
 exports.modifyHPic = async (req, res, next) => {
     try {
         const userId = auth.getUserID(req);
+        const user = await db.User.findOne({ where: { id: userId } });
         const isModo = await db.User.findOne({ where: { id: userId } });
         const isAdmin = await db.User.findOne({ where: { id: userId } });
         const thisPic = await db.Pic.findOne({ where: { id: req.params.id } });
         if (userId === thisPic.UserId || isModo.role === "modo" || isAdmin.role === "admin") {
-            if (req.file) {
-                fs.copyFile(`./pics/${thisPic.picName}`, `./picshistory/${thisPic.picName}`, (error) => {
-                    if (error) {
-                      console.log(error)
-                    }
-                    else {
-                      console.log("Image copiée")
-                    }
-                })
-                let picUrl = `${req.protocol}://${req.get('host')}/picshistory/${thisPic.picName}`;
-                await db.History.create({
-                    picid: thisPic.id,
-                    picUrl: picUrl,
-                    picName: thisPic.picName,
-                    location: thisPic.location,
-                    description: thisPic.description,
-                    picModifiedBy: user.id,
-                    UserId: user.id,
-                    userUsername: user.username,
-                    userEmail: user.email,
-                    historyReason: "modified"
-                })
-            } 
+            fs.copyFile(`./pics/${thisPic.picName}`, `./picshistory/${thisPic.picName}`, (error) => {
+                if (error) {
+                    console.log(error)
+                }
+                else {
+                    console.log("Image copiée")
+                }
+            })
+            let picUrl = `${req.protocol}://${req.get('host')}/picshistory/${thisPic.picName}`;
+            await db.History.create({
+                picid: thisPic.id,
+                picUrl: picUrl,
+                picName: thisPic.picName,
+                location: thisPic.location,
+                description: thisPic.description,
+                picModifiedBy: user.id,
+                UserId: user.id,
+                userUsername: user.username,
+                userEmail: user.email,
+                historyReason: "modified"
+            })
             next();
         }
     } catch (error) {
@@ -87,7 +86,42 @@ exports.getAllHistory = async (req, res, next) => {
             res.status(400).json({ message: "Vous n'êtes pas autorisé à afficher cette page" });
         }
     } catch (error) {
-        //console.log("Erreur Serveur")
         return res.status(500).json({ error: "Erreur Serveur" });        
     } 
+};
+
+
+exports.reportHPic = async (req, res, next) => {
+    try {
+        const userId = auth.getUserID(req);
+        const user = await db.User.findOne({ where: { id: userId } });
+        const thisPic = await db.Pic.findOne({ where: { id: req.params.id } });
+            if (thisPic.reportReason = true) {
+                fs.copyFile(`./pics/${thisPic.picName}`, `./picshistory/${thisPic.picName}`, (error) => {
+                    if (error) {
+                        console.log(error)
+                    }
+                    else {
+                        console.log("Image copiée")
+                    }
+                })
+                let picUrl = `${req.protocol}://${req.get('host')}/picshistory/${thisPic.picName}`;
+                await db.History.create({
+                    picid: thisPic.id,
+                    picUrl: picUrl,
+                    picName: thisPic.picName,
+                    location: thisPic.location,
+                    description: thisPic.description,
+                    errorReportedBy: user.id,
+                    errorComment: req.body.reportreason,
+                    UserId: user.id,
+                    userUsername: user.username,
+                    userEmail: user.email,
+                    historyReason: "reported"
+                })
+                res.status(200).json("OK");
+            }
+    } catch (error) {
+        return res.status(500).json({ error: "Erreur Serveur" });
+    }
 };

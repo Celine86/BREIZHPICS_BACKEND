@@ -46,14 +46,18 @@ exports.login = async (req, res, next) => {
       if (!hashed) {
         return res.status(401).json({ error: "Le mot de passe est incorrect !" });
       } else {
-        res.status(200).json({
-          //message: "Vous êtes connecté",
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          userId: user.id,
-          token: jwt.sign({userId: user.id}, process.env.TOKEN, {expiresIn: '24h'})
-      })
+        if (user.status = true) {
+            res.status(200).json({
+              //message: "Vous êtes connecté",
+              username: user.username,
+              email: user.email,
+              role: user.role,
+              userId: user.id,
+              token: jwt.sign({userId: user.id}, process.env.TOKEN, {expiresIn: '24h'})
+          })
+        } else {
+          return res.status(401).json({ error: "Vous êtes temporairement banni" });
+        }
       }
     }
   } catch (error) {
@@ -90,7 +94,7 @@ exports.modifyAccount = async (req, res, next) => {
       message: "Votre avatar a bien été modifié",
     });
     if (!req.file) {
-      return res.status(403).json({ error: "Toto" });
+      return res.status(403).json({ error: "Votre avatar n'a pas été modifié, merci de réessayer plus tard" });
     }
     } else {
       return res.status(403).json({ error: "Vous n'êtes pas autorisé à modifier ce profil" });
@@ -126,8 +130,7 @@ exports.deleteAccount = async (req, res) => {
 
 exports.getOneUser = async (req, res, next) => {
   try {
-    const user = await db.User.findOne({ attributes: ["id", "username", "email", "avatar"],
-    where: { id: req.params.id } });
+    const user = await db.User.findOne({ attributes: ["id", "username", "email", "avatar"], where: { id: req.params.id } });
     res.status(200).json({userInfos : user});
   } catch (error) {
     return res.status(500).json({ error: "Erreur Serveur" });
@@ -136,9 +139,53 @@ exports.getOneUser = async (req, res, next) => {
 
 exports.getAllUsers = async (req, res, next) => {
   try {
-    const users = await db.User.findAll({ attributes: ["id", "username", "email", "avatar", "createdAt"],
-    where: { role: { [Op.not]: ["admin", "modo" ]} }, });
+    const users = await db.User.findAll({ attributes: ["id", "username", "email", "avatar", "createdAt"], where: { role: { [Op.not]: ["admin", "modo" ]} }, });
     res.status(200).json(users);
+  } catch (error) {
+    return res.status(500).json({ error: "Erreur Serveur" });
+  }
+};
+
+exports.modoRank = async (req, res, next) => {
+  try {
+    const user = await db.User.findOne({ attributes: ["id", "username", "email", "avatar"], where: { id: req.params.id } }); 
+    const userId = auth.getUserID(req); 
+    const isAdmin = await db.User.findOne({ where: { id: userId } });
+    if (isAdmin.role === "admin" && user.role === "user") {
+      user.role = "modo";
+      await user.save({ fields: ["role"] });
+      res.status(200).json({ message: "Role de modérateur attribué" });
+    } 
+    if (isAdmin.role === "admin" && user.role === "modo") {
+      user.role = "user";
+      await user.save({ fields: ["role"] });
+      res.status(200).json({ message: "Role de modérateur retiré" });
+    }else {
+      return res.status(403).json({ error: "Vous n'êtes pas autorisé à faire cette action" });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: "Erreur Serveur" });
+  }
+};
+
+exports.ban = async (req, res, next) => {
+  try {
+    const user = await db.User.findOne({ attributes: ["id", "username", "email", "avatar"], where: { id: req.params.id } }); 
+    const userId = auth.getUserID(req); 
+    const isAdmin = await db.User.findOne({ where: { id: userId } });
+    const isModo = await db.User.findOne({ where: { id: userId } })
+    if ((isAdmin.role === "admin" || isModo.role === "modo") && user.status === true) {
+      user.status = false;
+      await user.save({ fields: ["status"] });
+      res.status(200).json({ message: "Utilisateur banni" });
+    } 
+    if ((isAdmin.role === "admin" || isModo.role === "modo") && user.status === false) {
+      user.status = true;
+      await user.save({ fields: ["status"] });
+      res.status(200).json({ message: "Utilisateur autorisé" });
+    }else {
+      return res.status(403).json({ error: "Vous n'êtes pas autorisé à faire cette action" });
+    }
   } catch (error) {
     return res.status(500).json({ error: "Erreur Serveur" });
   }
