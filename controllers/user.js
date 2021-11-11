@@ -14,7 +14,7 @@ exports.signup = async (req, res, next) => {
         where: { [Op.or]: [{username: req.body.username}, {email: req.body.email}] },
       });
       if (user !== null) {
-          return res.status(401).json({ error: "Ce pseudonyme ou cet email est déjà utilisé" });
+          return res.status(401).json({ error: "Ce pseudonyme ou cet e-mail est déjà utilisé" });
       } else { 
           const hashed = await bcrypt.hash(req.body.password, 10)
           db.User.create({
@@ -46,7 +46,7 @@ exports.login = async (req, res, next) => {
       if (!hashed) {
         return res.status(401).json({ error: "Le mot de passe est incorrect !" });
       } else {
-        if (user.status = true) {
+        if (user.status === true) {
             res.status(200).json({
               //message: "Vous êtes connecté",
               username: user.username,
@@ -148,19 +148,22 @@ exports.getAllUsers = async (req, res, next) => {
 
 exports.modoRank = async (req, res, next) => {
   try {
-    const user = await db.User.findOne({ attributes: ["id", "username", "email", "avatar"], where: { id: req.params.id } }); 
+    const user = await db.User.findOne({ attributes: ["id", "username", "email", "avatar", "role"], where: { id: req.params.id } }); 
     const userId = auth.getUserID(req); 
     const isAdmin = await db.User.findOne({ where: { id: userId } });
-    if (isAdmin.role === "admin" && user.role === "user") {
+    if ((isAdmin.role === "admin") && (user.role === "user")) {
       user.role = "modo";
       await user.save({ fields: ["role"] });
-      res.status(200).json({ message: "Role de modérateur attribué" });
+      return res.status(200).json({ message: "Rôle de modérateur attribué" });
     } 
-    if (isAdmin.role === "admin" && user.role === "modo") {
+    if ((isAdmin.role === "admin") && (user.role === "modo")) {
       user.role = "user";
       await user.save({ fields: ["role"] });
-      res.status(200).json({ message: "Role de modérateur retiré" });
+      return res.status(200).json({ message: "Rôle de modérateur retiré" });
     }else {
+      console.log(isAdmin.role);
+      console.log(user.role);
+      console.log(user);
       return res.status(403).json({ error: "Vous n'êtes pas autorisé à faire cette action" });
     }
   } catch (error) {
@@ -170,19 +173,19 @@ exports.modoRank = async (req, res, next) => {
 
 exports.ban = async (req, res, next) => {
   try {
-    const user = await db.User.findOne({ attributes: ["id", "username", "email", "avatar"], where: { id: req.params.id } }); 
+    const user = await db.User.findOne({ attributes: ["id", "username", "email", "avatar", "status"], where: { id: req.params.id } }); 
     const userId = auth.getUserID(req); 
     const isAdmin = await db.User.findOne({ where: { id: userId } });
     const isModo = await db.User.findOne({ where: { id: userId } })
     if ((isAdmin.role === "admin" || isModo.role === "modo") && user.status === true) {
       user.status = false;
       await user.save({ fields: ["status"] });
-      res.status(200).json({ message: "Utilisateur banni" });
+      return res.status(200).json({ message: "Utilisateur banni" });
     } 
     if ((isAdmin.role === "admin" || isModo.role === "modo") && user.status === false) {
       user.status = true;
       await user.save({ fields: ["status"] });
-      res.status(200).json({ message: "Utilisateur autorisé" });
+      return res.status(200).json({ message: "Utilisateur autorisé" });
     }else {
       return res.status(403).json({ error: "Vous n'êtes pas autorisé à faire cette action" });
     }

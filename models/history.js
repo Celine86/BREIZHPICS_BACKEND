@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     picName: { type: DataTypes.STRING, allowNull: true },
     location: { type: DataTypes.STRING, allowNull: true },
     description: { type: DataTypes.TEXT, allowNull: true },
+    createdBy: { type: DataTypes.STRING, allowNull: true },
     errorReportedBy: { type: DataTypes.STRING, allowNull: true },
     errorComment: { type: DataTypes.TEXT, allowNull: true },
     picModifiedBy: { type: DataTypes.STRING, allowNull: true },

@@ -27,7 +27,6 @@ module.exports = (sequelize, DataTypes) => {
     beforeSubmission: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
     validatedBy: { type: DataTypes.STRING, allowNUll: true },
     errorReported: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-    reportReason: { type: DataTypes.TEXT, allowNull: true },
     unreportedBy: { type: DataTypes.STRING, allowNUll: true },
     modifiedBy: { type: DataTypes.STRING, allowNull: true },
   }, {

@@ -48,10 +48,11 @@ exports.fileUpload = (req, res, next) => {
             }
             return res.json(error);
         } else {
+            /*
             if (!req.file) {
-                res.status(500);
-                res.json('Aucun fichier trouvé');
+                return res.status(403).json({ message: "Merci de rajouter une photographie" });
             }
+            */
             next();
         }
     })

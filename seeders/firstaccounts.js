@@ -29,12 +29,10 @@ function firstAdmin(req, res) {
           });
       } else {
         console.log("le compte admin existe déjà");
-        //console.log({ message: "le compte existe déjà" });
       }
     })
     .catch((error) => {
       console.log(error);
-      //console.log({ error });
     });
 }
 module.exports = firstAdmin();
@@ -66,12 +64,10 @@ function firstModo(req, res) {
           });
       } else {
         console.log("le compte modo existe déjà");
-        //console.log({ message: "le compte existe déjà" });
       }
     })
     .catch((error) => {
       console.log(error);
-      //console.log({ error });
     });
 }
 module.exports = firstModo();
@@ -103,12 +99,10 @@ function firstUser(req, res) {
           });
       } else {
         console.log("le compte utilisateur existe déjà");
-        //console.log({ message: "le compte existe déjà" });
       }
     })
     .catch((error) => {
       console.log(error);
-      //console.log({ error });
     });
 }
 module.exports = firstUser();
