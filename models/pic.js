@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
           allowNull: false,
         }, onDelete: 'CASCADE',
       })
+      models.Pic.hasMany(models.Like);
     }
   };
   Pic.init({

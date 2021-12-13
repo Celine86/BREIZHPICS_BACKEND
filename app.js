@@ -7,9 +7,9 @@ db.sequelize.sync()
 
 .then(function () {
   require("./seeders/firstaccounts");
-  firstAdmin();
-  firstModo();
-  firstUser();
+})
+.catch((error) => {
+  console.log(error);
 });
 
 // Sync Tables and force modifications 

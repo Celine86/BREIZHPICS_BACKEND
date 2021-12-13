@@ -21,4 +21,6 @@ router.get("/reportedpics", auth.signin, ctrlpic.getAllReportedPics);
 
 router.put("/report/:id", auth.signin, ctrlpic.reportPic, ctrlhistory.reportHPic);
 
+router.post("/like/:id", auth.signin, ctrlpic.addLike);
+
 module.exports = router;

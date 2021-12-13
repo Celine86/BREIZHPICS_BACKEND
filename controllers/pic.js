@@ -121,10 +121,13 @@ exports.getAllPicsByLocation = async (req, res, next) => {
         } else {
             const pics = await db.Pic.findAll({ 
                 where: { location: req.body.location, before_submission: 0 }, 
-                limit: 10,
-                order: [["created_at", "DESC"]],
-                attributes: ["id", "location", "description", "picUrl", "createdAt", "updatedAt"],
-                include: [{model: db.User, attributes: ["username"]}]
+                limit: 10, order: [["created_at", "DESC"]],
+                //attributes: ["id", "location", "description", "picUrl", "createdAt", "updatedAt"],
+                //attributes: ["id", "picUrl", "picName", "location", "description", "beforeSubmission", "validatedBy", "errorReported", "unreportedBy", "modifiedBy", "createdAt", "updatedAt", "userId"],
+                include: [
+                    {model: db.User, attributes: ["username"]},
+                    {model: db.Like, include: [{model: db.User, attributes: ["username"]}]}
+                ],
             });
             if(pics.length !== 0) {
                 res.status(200).json(pics);
@@ -146,8 +149,11 @@ exports.getAllPicsByDescription = async (req, res, next) => {
                 where: { description: { [Op.like]: `%${req.body.description}%` }, before_submission: 0, error_reported: 0 }, 
                 limit: 10,
                 order: [["created_at", "DESC"]],
-                attributes: ["id", "location", "description", "picUrl"],
-                include: [{model: db.User, attributes: ["username"]}]
+                //attributes: ["id", "location", "description", "picUrl"],
+                include: [
+                    {model: db.User, attributes: ["username"]},
+                    {model: db.Like, include: [{model: db.User, attributes: ["username"]}]}
+                ]
             });
             if(pics.length !== 0) {
                 res.status(200).json(pics);
@@ -254,3 +260,27 @@ exports.getAllReportedPics = async (req, res, next) => {
     }
 };
 
+
+
+exports.addLike = async (req, res, next) => {
+    try {
+        const userId = auth.getUserID(req);
+        const picId = req.params.id;
+        const userLiked = await db.Like.findOne({ where: { UserId: userId, PicId: picId }, });
+        if (userLiked) {
+            await db.Like.destroy(
+                { where: { UserId: userId, PicId: picId } },
+                { truncate: true, restartIdentity: true }                
+            );
+            res.status(200).json({ message: "Vous n'aimez plus ce post :(" });
+        } else {
+            await db.Like.create({
+                UserId: userId,
+                PicId: picId,
+            });
+            res.status(200).json({ message: "Vous aimez ce post !" });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: "Erreur Serveur" });
+    }
+};
