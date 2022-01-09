@@ -8,7 +8,7 @@ const fs = require("fs");
 const xss = require("xss");
 
 exports.signup = async (req, res, next) => {
-  if (req.body.username && req.body.email && req.body.password) {
+  if (req.body.username && req.body.email && req.body.password && req.body.verifyPassword) {
     try {
       const user = await db.User.findOne({
         where: { [Op.or]: [{username: req.body.username}, {email: req.body.email}] },
@@ -16,6 +16,7 @@ exports.signup = async (req, res, next) => {
       if (user !== null) {
           return res.status(401).json({ error: "Ce pseudonyme ou cet e-mail est déjà utilisé" });
       } else { 
+        if (req.body.password === req.body.verifyPassword) {
           const hashed = await bcrypt.hash(req.body.password, 10)
           db.User.create({
               username: xss(req.body.username),
@@ -25,6 +26,9 @@ exports.signup = async (req, res, next) => {
               avatar: `${process.env.SERVERADDRESS}defaultpics/avatar.png`
           });
           res.status(201).json({ message: "Votre compte est créé. Vous pouvez vous connecter avec votre identifiant et mot de passe !" });
+        } else {
+          return res.status(401).json({ error: "Les mots de passe ne correspondent pas" });
+        }
       }
     } catch (error) {
       return res.status(500).json({ error: "Erreur Serveur" });
@@ -69,33 +73,74 @@ exports.modifyAccount = async (req, res, next) => {
   try {
     const userId = auth.getUserID(req);
     const user = await db.User.findOne({ where: { id: req.params.id } });
-    let newAvatar;
     if (req.params.id === userId){
-      if (req.file && user.avatar) {
-        newAvatar = `${req.protocol}://${req.get("host")}/avatars/${
-          req.file.filename
-        }`;
-      const filename = user.avatar.split("/avatars")[1];
-        fs.unlink(`avatars/${filename}`, (err) => {
-          if (err) console.log(err);
-          else { console.log(`Image Supprimée: avatars/${filename}`); }
+      if(!req.file && !req.body.email && !req.body.password) {
+        res.status(200).json({
+          user: user,
+          message: "Votre profil n'a pas été modifié",
         });
-    } else if (req.file) {
-      newAvatar = `${req.protocol}://${req.get("host")}/avatars/${
-        req.file.filename
-      }`;
-    }
-    if (newAvatar) {
-      user.avatar = newAvatar;
-    }
-    const newUser = await user.save({ fields: ["avatar"] });
-    res.status(200).json({
-      user: newUser,
-      message: "Votre avatar a bien été modifié",
-    });
-    if (!req.file) {
-      return res.status(403).json({ error: "Votre avatar n'a pas été modifié, merci de réessayer plus tard" });
-    }
+      } else {
+        // Modification de l'avatar
+        if(!req.file){
+          console.log("L'utilisateur ne souhaite pas modifier son avatar")
+        } else {
+          let newAvatar;
+          if (req.file && user.avatar) {
+            newAvatar = `${req.protocol}://${req.get("host")}/avatars/${
+              req.file.filename
+            }`;
+            const filename = user.avatar.split("/avatars")[1];
+              fs.unlink(`avatars/${filename}`, (err) => {
+                if (err) console.log(err);
+                else { console.log(`Image Supprimée: avatars/${filename}`); }
+              });
+          } else if (req.file) {
+            newAvatar = `${req.protocol}://${req.get("host")}/avatars/${
+              req.file.filename
+            }`;
+          }
+          if (newAvatar) {
+            user.avatar = newAvatar;
+          }
+        }
+        // Modification de l'email
+        if (!req.body.email) {
+          console.log("L'utilisateur ne souhaite pas modifier son e-mail")
+        } else {
+          let newEmail;
+          const userExists = await db.User.findOne({
+            where: {email: req.body.email},
+          });
+          if (userExists !== null) {
+              return res.status(401).json({ error: "Cet e-mail est déjà utilisé" });
+          } else { 
+            newEmail = xss(req.body.email);
+          }
+          if (newEmail) {
+            user.email = newEmail;
+          }
+        } 
+        // Modification du mot de passe 
+        if (!req.body.password || !req.body.verifyPassword) {
+          console.log("L'utilisateur ne souhaite pas modifier son mot de passe")
+        } else {
+          let newPassword;
+          if (req.body.password === req.body.verifyPassword) {
+            newPassword = await bcrypt.hash(req.body.password, 10)
+          } else {
+            return res.status(401).json({ error: "Les mots de passe ne correspondent pas" });
+          }
+          if (newPassword) {
+            user.password = newPassword;
+          }
+        }
+        // Enregistrement des modifications 
+        const newUser = await user.save({ fields: ["avatar", "email", "password"] });
+        res.status(200).json({
+          user: newUser,
+          message: "Votre profil a bien été modifié",
+        });
+      }
     } else {
       return res.status(403).json({ error: "Vous n'êtes pas autorisé à modifier ce profil" });
     }

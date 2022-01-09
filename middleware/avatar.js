@@ -48,10 +48,10 @@ exports.fileUpload = (req, res, next) => {
             }
             return res.json(error);
         } else {
-            if (!req.file) {
+            /*if (!req.file) {
                 res.status(500);
                 res.json('Aucun fichier trouvé');
-            }
+            }*/
             next();
         }
     })
