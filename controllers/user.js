@@ -52,7 +52,7 @@ exports.login = async (req, res, next) => {
       } else {
         if (user.status === true) {
             res.status(200).json({
-              //message: "Vous êtes connecté",
+              message: "Vous êtes connecté",
               username: user.username,
               email: user.email,
               role: user.role,
