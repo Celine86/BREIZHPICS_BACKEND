@@ -23,7 +23,7 @@ exports.signup = async (req, res, next) => {
               email: xss(req.body.email),
               password: hashed,
               role: "user",
-              avatar: `${process.env.SERVERADDRESS}defaultpics/avatar.png`
+              avatar: `${process.env.SERVERADDRESS}defaultpics/avatar.jpg`
           });
           res.status(201).json({ message: "Votre compte est créé. Vous pouvez vous connecter avec votre identifiant et mot de passe !" });
         } else {
