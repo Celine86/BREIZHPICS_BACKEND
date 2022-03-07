@@ -11,7 +11,7 @@ function firstAdmin(req, res) {
             db.User.create({
               username: "admin",
               email: "admin@breizhpics.bzh",
-              avatar: `${process.env.SERVERADDRESS}defaultpics/avatar.jpg`,
+              avatar: `${req.protocol}://${req.get("host")}/defaultpics/avatar.jpg`,
               password: hash,
               role: "admin",
             })
@@ -46,7 +46,7 @@ function firstModo(req, res) {
             db.User.create({
               username: "modo",
               email: "modo@breizhpics.bzh",
-              avatar: `${process.env.SERVERADDRESS}defaultpics/avatar.jpg`,
+              avatar: `${req.protocol}://${req.get("host")}/defaultpics/avatar.jpg`,
               password: hash,
               role: "modo",
             })
@@ -81,7 +81,7 @@ function firstUser(req, res) {
             db.User.create({
               username: "toto",
               email: "toto@breizhpics.bzh",
-              avatar: `${process.env.SERVERADDRESS}defaultpics/avatar.jpg`,
+              avatar: `${req.protocol}://${req.get("host")}/defaultpics/avatar.jpg`,
               password: hash,
               role: "user",
             })

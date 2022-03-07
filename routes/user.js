@@ -7,6 +7,8 @@ const auth = require("../middleware/auth");
 
 router.post("/signup", check.mail, check.password, ctrl.signup);
 router.post("/login", ctrl.login);
+router.put("/profils/modifyAccount/email/:id", auth.signin, check.mail, ctrl.modifyEmail);
+router.put("/profils/modifyAccount/pswd/:id", auth.signin, check.password, ctrl.modifyPassword);
 router.put("/profils/modifyAccount/:id", auth.signin, avatar.fileUpload, ctrl.modifyAccount);
 router.put("/profils/modo/:id", auth.signin, ctrl.modoRank);
 router.put("/profils/ban/:id", auth.signin, ctrl.ban);

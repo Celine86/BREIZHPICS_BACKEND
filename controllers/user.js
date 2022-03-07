@@ -23,7 +23,7 @@ exports.signup = async (req, res, next) => {
               email: xss(req.body.email),
               password: hashed,
               role: "user",
-              avatar: `${process.env.SERVERADDRESS}defaultpics/avatar.jpg`
+              avatar: `${req.protocol}://${req.get("host")}/defaultpics/avatar.jpg`
           });
           res.status(201).json({ message: "Votre compte est créé. Vous pouvez vous connecter avec votre identifiant et mot de passe !" });
         } else {
@@ -57,7 +57,7 @@ exports.login = async (req, res, next) => {
               email: user.email,
               role: user.role,
               userId: user.id,
-              token: jwt.sign({userId: user.id}, process.env.TOKEN, {expiresIn: '24h'})
+              token: jwt.sign({userId: user.id}, process.env.TOKEN, {expiresIn: '24h'}),
           })
         } else {
           return res.status(401).json({ error: "Vous êtes temporairement banni" });
@@ -74,16 +74,13 @@ exports.modifyAccount = async (req, res, next) => {
     const userId = auth.getUserID(req);
     const user = await db.User.findOne({ where: { id: req.params.id } });
     if (req.params.id === userId){
-      if(!req.file && !req.body.email && !req.body.password) {
+      if(!req.file) {
         res.status(200).json({
           user: user,
           message: "Votre profil n'a pas été modifié",
         });
       } else {
         // Modification de l'avatar
-        if(!req.file){
-          console.log("L'utilisateur ne souhaite pas modifier son avatar")
-        } else {
           let newAvatar;
           if (req.file && user.avatar) {
             newAvatar = `${req.protocol}://${req.get("host")}/avatars/${
@@ -102,11 +99,38 @@ exports.modifyAccount = async (req, res, next) => {
           if (newAvatar) {
             user.avatar = newAvatar;
           }
-        }
-        // Modification de l'email
-        if (!req.body.email) {
-          console.log("L'utilisateur ne souhaite pas modifier son e-mail")
+        // Enregistrement des modifications 
+        const newUser = await user.save({ fields: ["avatar"] });
+        res.status(200).json({
+          user: newUser,
+          message: "Votre profil a bien été modifié",
+        });
+      }
+    } else {
+      return res.status(403).json({ error: "Vous n'êtes pas autorisé à modifier ce profil" });
+    }
+  } catch (error) {
+    console.log(error)
+    //return res.status(500).json({ error: "Erreur Serveur" });
+  }
+};
+
+exports.modifyEmail = async (req, res, next) => {
+  try {
+    const userId = auth.getUserID(req);
+    const user = await db.User.findOne({ where: { id: req.params.id } });
+    if (req.params.id === userId){
+      if(!req.body.email) {
+        res.status(200).json({
+          user: user,
+          message: "Votre profil n'a pas été modifié",
+        });
+      } else {
+        // Modification de l'avatar
+        if(!req.file){
+          console.log("L'utilisateur ne souhaite pas modifier son avatar")
         } else {
+        // Modification de l'email
           let newEmail;
           const userExists = await db.User.findOne({
             where: {email: req.body.email},
@@ -120,10 +144,40 @@ exports.modifyAccount = async (req, res, next) => {
             user.email = newEmail;
           }
         } 
+        // Enregistrement des modifications 
+        const newUser = await user.save({ fields: ["email"] });
+        res.status(200).json({
+          user: newUser,
+          message: "Votre profil a bien été modifié",
+        });
+      }
+    } else {
+      return res.status(403).json({ error: "Vous n'êtes pas autorisé à modifier ce profil" });
+    }
+  } catch (error) {
+    console.log(error)
+    //return res.status(500).json({ error: "Erreur Serveur" });
+  }
+};
+
+exports.modifyPassword = async (req, res, next) => {
+  try {
+    const userId = auth.getUserID(req);
+    const user = await db.User.findOne({ where: { id: req.params.id } });
+    if (req.params.id === userId){
+      if(!req.body.password) {
+        res.status(200).json({
+          user: user,
+          message: "Votre profil n'a pas été modifié",
+        });
+      } else { 
         // Modification du mot de passe 
         if (!req.body.password || !req.body.verifyPassword) {
           console.log("L'utilisateur ne souhaite pas modifier son mot de passe")
-        } else {
+        }
+        if (req.body.password && !req.body.verifyPassword) {
+          return res.status(401).json({ error: "Merci de confirmer le mot d epasse" });
+        } else if (req.body.password && req.body.password) {
           let newPassword;
           if (req.body.password === req.body.verifyPassword) {
             newPassword = await bcrypt.hash(req.body.password, 10)
@@ -135,7 +189,7 @@ exports.modifyAccount = async (req, res, next) => {
           }
         }
         // Enregistrement des modifications 
-        const newUser = await user.save({ fields: ["avatar", "email", "password"] });
+        const newUser = await user.save({ fields: ["password"] });
         res.status(200).json({
           user: newUser,
           message: "Votre profil a bien été modifié",
