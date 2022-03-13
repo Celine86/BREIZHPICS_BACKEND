@@ -23,7 +23,8 @@ exports.signup = async (req, res, next) => {
               email: xss(req.body.email),
               password: hashed,
               role: "user",
-              avatar: `${req.protocol}://${req.get("host")}/defaultpics/avatar.jpg`
+              avatar: `${req.protocol}://${req.get("host")}/defaultpics/avatar.jpg`,
+              bio: "présentez-vous !"
           });
           res.status(201).json({ message: "Votre compte est créé. Vous pouvez vous connecter avec votre identifiant et mot de passe !" });
         } else {
@@ -74,7 +75,7 @@ exports.modifyAccount = async (req, res, next) => {
     const userId = auth.getUserID(req);
     const user = await db.User.findOne({ where: { id: req.params.id } });
     if (req.params.id === userId){
-      if(!req.file) {
+      if(!req.file && !req.body.username && !req.body.bio) {
         res.status(200).json({
           user: user,
           message: "Votre profil n'a pas été modifié",
@@ -99,8 +100,16 @@ exports.modifyAccount = async (req, res, next) => {
           if (newAvatar) {
             user.avatar = newAvatar;
           }
+          // modification du pseudonyme
+          if(req.body.username){
+            user.username = xss(req.body.username)
+          }
+          // modification de la biographie
+          if(req.body.bio){
+            user.bio = xss(req.body.bio) 
+          }
         // Enregistrement des modifications 
-        const newUser = await user.save({ fields: ["avatar"] });
+        const newUser = await user.save({ fields: ["avatar", "username", "bio"] });
         res.status(200).json({
           user: newUser,
           message: "Votre profil a bien été modifié",
@@ -229,7 +238,7 @@ exports.deleteAccount = async (req, res) => {
 
 exports.getOneUser = async (req, res, next) => {
   try {
-    const user = await db.User.findOne({ attributes: ["id", "username", "email", "avatar"], where: { id: req.params.id } });
+    const user = await db.User.findOne({ attributes: ["id", "username", "email", "avatar", "bio"], where: { id: req.params.id } });
     res.status(200).json({userInfos : user});
   } catch (error) {
     return res.status(500).json({ error: "Erreur Serveur" });

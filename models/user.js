@@ -23,7 +23,8 @@ module.exports = (sequelize, DataTypes) => {
     password: {  type: DataTypes.STRING, allowNull: false },
     avatar: { type: DataTypes.STRING },
     role: { type: DataTypes.STRING, allowNull: false, defaultValue: "user" },
-    status: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
+    status: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+    bio: {type: DataTypes.TEXT }
   }, {
     sequelize,
     modelName: 'User',
