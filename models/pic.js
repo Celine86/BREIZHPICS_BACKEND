@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     validatedBy: { type: DataTypes.STRING, allowNUll: true },
     errorReported: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     unreportedBy: { type: DataTypes.STRING, allowNUll: true },
-    modifiedBy: { type: DataTypes.STRING, allowNull: true },
+    modifiedBy: { type: DataTypes.STRING, allowNull: true }
   }, {
     sequelize,
     modelName: 'Pic',
