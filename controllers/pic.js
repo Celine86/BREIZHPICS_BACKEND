@@ -263,10 +263,13 @@ exports.getAllReportedPics = async (req, res, next) => {
 exports.getAllPics = async (req, res, next) => {
     try {
         const allPics = await db.Pic.findAll({
-            include: [{model: db.User, attributes: ["username", "avatar"]}],
+            limit: 50, order: [["id", "DESC"]], 
+            include: [
+                {model: db.User, attributes: ["username", "avatar"]},
+                {model: db.Like, attributes: ["UserId"]}
+            ],
             where: { [Op.and]: [{ errorReported: false }, {beforeSubmission: false}] }
         })
-        //({where: { [Op.and]: [{ errorReported: false }, {beforeSubmission: false}] } });
             res.status(200).json({ allPics });
     } catch {
         return res.status(500).json({ error: "Erreur Serveur" });
