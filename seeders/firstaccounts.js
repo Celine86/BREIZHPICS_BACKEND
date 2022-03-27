@@ -11,7 +11,6 @@ function firstAdmin(req, res) {
             db.User.create({
               username: "admin",
               email: "admin@breizhpics.bzh",
-              //avatar: `${req.protocol}://${req.get("host")}/defaultpics/avatar.jpg`,
               avatar: `${process.env.SERVERADDRESS}defaultpics/avatar.jpg`,
               password: hash,
               bio: "présentez-vous !",
@@ -48,7 +47,6 @@ function firstModo(req, res) {
             db.User.create({
               username: "modo",
               email: "modo@breizhpics.bzh",
-              //avatar: `${req.protocol}://${req.get("host")}/defaultpics/avatar.jpg`,
               avatar: `${process.env.SERVERADDRESS}defaultpics/avatar.jpg`,
               password: hash,
               bio: "présentez-vous !",
@@ -85,7 +83,6 @@ function firstUser(req, res) {
             db.User.create({
               username: "breizhpics",
               email: "breizhpics@breizhpics.bzh",
-              //avatar: `${req.protocol}://${req.get("host")}/defaultpics/avatar.jpg`,
               avatar: `${process.env.SERVERADDRESS}defaultpics/avatar.jpg`,
               password: hash,
               bio: "présentez-vous !",
@@ -94,18 +91,58 @@ function firstUser(req, res) {
             .then((account) => {
                 console.log(`Le compte ${account.id} a été créé!`)
                 db.Pic.create({
-                  picUrl: `${process.env.SERVERADDRESS}defaultpics/firstpic.JPG`,
-                  picName: "firstpic",
+                  picUrl: `${process.env.SERVERADDRESS}defaultpics/Brehat_RetourVersLArcouest.jpg`,
+                  picName: "Brehat_RetourVersLArcouest",
                   location: "Brehat",
-                  description: "De retour à l'Arcouest",
+                  description: "De retour à L'Arcouest",
                   beforeSubmission: false,
                   UserId: account.id,
                 })
                 db.Pic.create({
-                  picUrl: `${process.env.SERVERADDRESS}defaultpics/secondpic.jpg`,
-                  picName: "secondpic",
+                  picUrl: `${process.env.SERVERADDRESS}defaultpics/Plouha_PlageDuPalus.jpg`,
+                  picName: "Plouha_PlageDuPalus",
                   location: "Plouha",
                   description: "Plage du Palus",
+                  beforeSubmission: false,
+                  UserId: account.id,
+                })
+                db.Pic.create({
+                  picUrl: `${process.env.SERVERADDRESS}defaultpics/Belle-Ile_PlageDesGrandsSables.jpg`,
+                  picName: "Belle-Ile_PlageDesGrandsSables",
+                  location: "Belle-Ile",
+                  description: "Près de la Plage des Grands Sables",
+                  beforeSubmission: false,
+                  UserId: account.id,
+                })
+                db.Pic.create({
+                  picUrl: `${process.env.SERVERADDRESS}defaultpics/Plouezec_MoulinDeCraca.jpg`,
+                  picName: "Plouezec_MoulinDeCraca",
+                  location: "Plouezec",
+                  description: "Moulin de Craca",
+                  beforeSubmission: false,
+                  UserId: account.id,
+                })
+                db.Pic.create({
+                  picUrl: `${process.env.SERVERADDRESS}defaultpics/Quiberon_CoteSauvage.jpg`,
+                  picName: "Quiberon_CoteSauvage",
+                  location: "Quiberon",
+                  description: "Côte Sauvage",
+                  beforeSubmission: false,
+                  UserId: account.id,
+                })
+                db.Pic.create({
+                  picUrl: `${process.env.SERVERADDRESS}defaultpics/Brehat_PhareDuPaon.jpg`,
+                  picName: "Brehat_PhareDuPaon",
+                  location: "Brehat",
+                  description: "Le Phare du Paon",
+                  beforeSubmission: false,
+                  UserId: account.id,
+                })
+                db.Pic.create({
+                  picUrl: `${process.env.SERVERADDRESS}defaultpics/Brehat_EntreBrehatEtLArcouest.jpg`,
+                  picName: "Brehat_EntreBrehatEtLArcouest",
+                  location: "Brehat",
+                  description: "Entre Brehat et L'Arcouest",
                   beforeSubmission: false,
                   UserId: account.id,
                 })
@@ -128,34 +165,3 @@ function firstUser(req, res) {
     });
   }
 module.exports = firstUser()
-
-
-/*
-async function firstPic(req, res) {
-  const breizhpics = await db.User.findOne({ where: { email: "breizhpics@breizhpics.bzh" } })
-  //console.log(breizhpics.id)
-  const firstpic = await db.Pic.findOne({ where: { isFirst: true } })
-  //console.log(firstpic.isFirst)
-      if (firstpic) {
-        console.log("le post existe déjà");
-      } else {
-        db.Pic.create({
-          picUrl: `${process.env.SERVERADDRESS}defaultpics/firstpic.JPG`,
-          picName: "firstpic",
-          location: "Brehat",
-          description: "De retour à l'Arcouest",
-          beforeSubmission: false,
-          UserId: breizhpics.id,
-          isFirst: 1
-        })
-          .then(() => {
-            console.log(`Le post a été créé!`);
-          })
-          .catch(() => { 
-            console.log("error");
-            //res.status(400).json({ error });
-          });
-      }
-}
-module.exports = firstPic()
-*/

@@ -11,8 +11,8 @@ router.put("/modify/:id", auth.signin, pic.fileUpload, ctrlhistory.modifyHPic, c
 router.delete("/delete/:id", auth.signin, ctrlhistory.deleteHPic, ctrlpic.deletePic);
 
 router.get("/all", ctrlpic.getAllPics);
-router.get("/location", ctrlpic.getAllPicsByLocation);
-router.get("/description", ctrlpic.getAllPicsByDescription);
+router.get("/all/:id", ctrlpic.getOnePic);
+router.post("/search", ctrlpic.getAllPicsByLocationOrDescription);
 
 router.put("/validate/:id", auth.signin, ctrlpic.validatePic);
 router.put("/unreport/:id", auth.signin, ctrlpic.validatePic, ctrlpic.modifyPic);

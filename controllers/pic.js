@@ -114,18 +114,18 @@ exports.deletePic = async (req, res, next) => {
     }
 };
 
-exports.getAllPicsByLocation = async (req, res, next) => {
+
+exports.getAllPicsByLocationOrDescription = async (req, res, next) => {
     try {
-        if(!req.body.location) {
-            res.status(200).json({ message: "Merci de renseigner un lieu" });
-        } else {
+        if(req.body.location && !req.body.description) {
             const pics = await db.Pic.findAll({ 
-                where: { location: req.body.location, before_submission: 0 }, 
+                limit: 50, order: [["id", "DESC"]],
+                where: { location: req.body.location, before_submission: 0, error_reported: 0 }, 
                 limit: 10, order: [["created_at", "DESC"]],
                 //attributes: ["id", "location", "description", "picUrl", "createdAt", "updatedAt"],
                 //attributes: ["id", "picUrl", "picName", "location", "description", "beforeSubmission", "validatedBy", "errorReported", "unreportedBy", "modifiedBy", "createdAt", "updatedAt", "userId"],
                 include: [
-                    {model: db.User, attributes: ["username"]},
+                    {model: db.User, attributes: ["username", "avatar"]},
                     {model: db.Like, include: [{model: db.User, attributes: ["username"]}]}
                 ],
             });
@@ -135,23 +135,15 @@ exports.getAllPicsByLocation = async (req, res, next) => {
                 res.status(200).json({ message: "Pas de photographie disponible" });
             }
         }
-    } catch (error) {
-        return res.status(500).json({ error: "Erreur Serveur" });        
-    }
-};
-
-exports.getAllPicsByDescription = async (req, res, next) => {
-    try {
-        if(!req.body.description) {
-            res.status(200).json({ message: "Merci de renseigner un lieu" });
-        } else {
+        if(req.body.description && !req.body.location) {
             const pics = await db.Pic.findAll({ 
+                limit: 50, order: [["id", "DESC"]],
                 where: { description: { [Op.like]: `%${req.body.description}%` }, before_submission: 0, error_reported: 0 }, 
                 limit: 10,
                 order: [["created_at", "DESC"]],
                 //attributes: ["id", "location", "description", "picUrl"],
                 include: [
-                    {model: db.User, attributes: ["username"]},
+                    {model: db.User, attributes: ["username", "avatar"]},
                     {model: db.Like, include: [{model: db.User, attributes: ["username"]}]}
                 ]
             });
@@ -160,6 +152,27 @@ exports.getAllPicsByDescription = async (req, res, next) => {
             } else {
                 res.status(200).json({ message: "Pas de photographie disponible" });
             }
+        }
+        if(req.body.location && req.body.description) {
+            const pics = await db.Pic.findAll({ 
+                limit: 50, order: [["id", "DESC"]],
+                where: { description: { [Op.like]: `%${req.body.description}%` }, location: req.body.location, before_submission: 0, error_reported: 0 }, 
+                limit: 10,
+                order: [["created_at", "DESC"]],
+                //attributes: ["id", "location", "description", "picUrl"],
+                include: [
+                    {model: db.User, attributes: ["username", "avatar"]},
+                    {model: db.Like, include: [{model: db.User, attributes: ["username"]}]}
+                ]
+            });
+            if(pics.length !== 0) {
+                res.status(200).json(pics);
+            } else {
+                res.status(200).json({ message: "Pas de photographie disponible" });
+            }
+        }
+        else if(!req.body.description && !req.body.location) {
+            res.status(200).json({ message: "Merci de renseigner un lieu ou un mot-clé" });
         }
     } catch (error) {
         return res.status(500).json({ error: "Erreur Serveur" });        
@@ -272,6 +285,22 @@ exports.getAllPics = async (req, res, next) => {
         })
             res.status(200).json({ allPics });
     } catch {
+        return res.status(500).json({ error: "Erreur Serveur" });
+    }
+};
+
+exports.getOnePic = async (req, res, next) => {
+    try {
+        const pic = await db.Pic.findOne({ 
+            include: [
+                {model: db.User, attributes: ["username", "avatar"]},
+                {model: db.Like, attributes: ["UserId"]}
+            ],
+            where: { [Op.and]: [{id: req.params.id}, { errorReported: false }, {beforeSubmission: false}] }
+
+        });
+        res.status(200).json(pic);
+    } catch (error) {
         return res.status(500).json({ error: "Erreur Serveur" });
     }
 };
