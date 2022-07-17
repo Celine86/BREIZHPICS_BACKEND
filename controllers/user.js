@@ -134,12 +134,7 @@ exports.modifyEmail = async (req, res, next) => {
           user: user,
           message: "Votre profil n'a pas été modifié",
         });
-      } else {
-        // Modification de l'avatar
-        if(!req.file){
-          console.log("L'utilisateur ne souhaite pas modifier son avatar")
-        } else {
-        // Modification de l'email
+      } else {        
           let newEmail;
           const userExists = await db.User.findOne({
             where: {email: req.body.email},
@@ -152,7 +147,6 @@ exports.modifyEmail = async (req, res, next) => {
           if (newEmail) {
             user.email = newEmail;
           }
-        } 
         // Enregistrement des modifications 
         const newUser = await user.save({ fields: ["email"] });
         res.status(200).json({

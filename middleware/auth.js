@@ -7,7 +7,7 @@ exports.signin = (req, res, next) => {
         jwt.verify(token, process.env.TOKEN);
         next();
     } catch {
-        res.status(401).json({ error: 'Utilisateur Non Authentifié!' });
+        res.status(401).json({ error: 'Utilisateur Non Authentifié' });
     }
 };
 

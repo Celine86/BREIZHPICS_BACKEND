@@ -29,7 +29,7 @@ exports.createPic = async (req, res, next) => {
                     picUrl: picUrl,
                     UserId: user.id
                 }); 
-                return res.status(200).json({ post: myPic, message: "Le post a été ajouté et est en attente de validation" });
+                return res.status(200).json({ post: myPic, message: "Le post a été ajouté et, s'il est conforme, sera visible sous 24h" });
             }
         }
         else {
@@ -95,12 +95,13 @@ exports.modifyPic = async (req, res, next) => {
 exports.deletePic = async (req, res, next) => {
     try {
         const userId = auth.getUserID(req)
+        const isModo = await db.User.findOne({ where: { id: userId } })
         const isAdmin = await db.User.findOne({ where: { id: userId } })
         const thisPic = await db.Pic.findOne({ 
             include: [{model: db.User, attributes: ["username"]}],
             where: { id: req.params.id } 
         });
-        if (userId === thisPic.UserId || isAdmin.role === "admin") {
+        if (userId === thisPic.UserId || isModo.role === "modo" || isAdmin.role === "admin") {
             const filename = thisPic.picUrl.split("/pics")[1];
             fs.unlink(`pics/${filename}`, () => {
                 db.Pic.destroy({ where: { id: thisPic.id } });
@@ -188,7 +189,7 @@ exports.getAllPicsToValidate = async (req, res, next) => {
             include: [{model: db.User, attributes: ["username"]}],
             where: { beforeSubmission: true } });
         if (isModo.role === "modo" || isAdmin.role === "admin") {
-            res.status(200).json({ pics: picsToValidate });
+            res.status(200).json({ picsToValidate });
         } else {
             res.status(400).json({ message: "Vous n'êtes pas autorisé à afficher cette page" });
         }
@@ -264,7 +265,7 @@ exports.getAllReportedPics = async (req, res, next) => {
             include: [{model: db.User, attributes: ["username"]}],
             where: { errorReported: true } });
         if (isModo.role === "modo" || isAdmin.role === "admin") {
-            res.status(200).json({ pics: reportedPics });
+            res.status(200).json({ reportedPics });
         } else {
             res.status(400).json({ message: "Vous n'êtes pas autorisé à afficher cette page" });
         }
@@ -293,7 +294,7 @@ exports.getOnePic = async (req, res, next) => {
     try {
         const pic = await db.Pic.findOne({ 
             include: [
-                {model: db.User, attributes: ["username", "avatar"]},
+                {model: db.User, attributes: ["username", "avatar", "id"]},
                 {model: db.Like, attributes: ["UserId"]}
             ],
             where: { [Op.and]: [{id: req.params.id}, { errorReported: false }, {beforeSubmission: false}] }
