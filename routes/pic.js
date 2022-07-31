@@ -15,12 +15,12 @@ router.get("/all/:id", auth.signin,ctrlpic.getOnePic);
 router.post("/search", ctrlpic.getAllPicsByLocationOrDescription);
 
 router.put("/validate/:id", auth.signin, ctrlpic.validatePic);
-router.put("/unreport/:id", auth.signin, ctrlpic.validatePic, ctrlpic.modifyPic);
+//router.put("/unreport/:id", auth.signin, ctrlpic.validatePic, ctrlpic.modifyPic);
 
 router.get("/picstovalidate", auth.signin, ctrlpic.getAllPicsToValidate);
-router.get("/reportedpics", auth.signin, ctrlpic.getAllReportedPics);
+//router.get("/reportedpics", auth.signin, ctrlpic.getAllReportedPics);
 
-router.put("/report/:id", auth.signin, ctrlpic.reportPic, ctrlhistory.reportHPic);
+//router.put("/report/:id", auth.signin, ctrlpic.reportPic, ctrlhistory.reportHPic);
 
 router.post("/like/:id", auth.signin, ctrlpic.addLike);
 

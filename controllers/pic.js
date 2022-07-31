@@ -214,7 +214,7 @@ exports.validatePic = async (req, res, next) => {
                 const newPic = await thisPic.save({ fields: ["beforeSubmission", "validatedBy"] });
                 return res.status(200).json({ newPost: newPic, message: "Le Post a été validé" });
             }
-            if (thisPic.errorReported === true) {
+            /*if (thisPic.errorReported === true) {
                 if (req.body.location) {
                     thisPic.location = xss(req.body.location);
                 }
@@ -225,7 +225,7 @@ exports.validatePic = async (req, res, next) => {
                 thisPic.unreportedBy = hasValidate.username;
                 const newPic = await thisPic.save({ fields: ["location", "description", "errorReported", "unreportedBy"] });
                 return res.status(200).json({ newPost: newPic, message: "Le Post a été validé" });
-            }
+            }*/
         } 
         else {
             if (isModo.role === "modo" || isAdmin.role === "admin") {
@@ -239,7 +239,7 @@ exports.validatePic = async (req, res, next) => {
     }
 };
 
-exports.reportPic = async (req, res, next) => {
+/*exports.reportPic = async (req, res, next) => {
     try {
         const thisPic = await db.Pic.findOne({ 
             include: [{model: db.User, attributes: ["username"]}],
@@ -254,9 +254,9 @@ exports.reportPic = async (req, res, next) => {
     } catch {
         return res.status(500).json({ error: "Erreur Serveur" });
     }
-};
+};*/
 
-exports.getAllReportedPics = async (req, res, next) => {
+/*exports.getAllReportedPics = async (req, res, next) => {
     try {
         const userId = auth.getUserID(req);
         const isModo = await db.User.findOne({ where: { id: userId } });
@@ -272,7 +272,7 @@ exports.getAllReportedPics = async (req, res, next) => {
     } catch {
         return res.status(500).json({ error: "Erreur Serveur" });
     }
-};
+};*/
 
 exports.getAllPics = async (req, res, next) => {
     try {
